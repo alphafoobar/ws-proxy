@@ -26,7 +26,10 @@ wss.on('connection', function connection(ws, req) {
             wsClient.send(message);
 
             if (messages_to_receive.length > 0) {
-                messages_to_receive.forEach(m => ws.send(m));
+                messages_to_receive.forEach(m => {
+                    console.log(new Date() + ' replaying %s: %s', ws['client_id'], m);
+                    ws.send(m);
+                });
             }
         } else {
             messages_to_send.push(message);
@@ -47,13 +50,10 @@ wss.on('connection', function connection(ws, req) {
     console.log(new Date() + ' subscriber connected %s', ws['client_id']);
 
     setTimeout(() => {
-        wss.clients.forEach(function each(client) {
-            if (client.readyState === WebSocket.OPEN) {
-                console.log(new Date() + ' closing client: %s', client['client_id']);
-                client.close();
-            }
-        });
-        console.log(new Date() + ' subscribers closed');
+        if (ws.readyState === WebSocket.OPEN) {
+            console.log(new Date() + ' closing client: %s', ws['client_id']);
+            ws.close();
+        }
     }, 120000);
 });
 
