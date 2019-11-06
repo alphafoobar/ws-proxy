@@ -35,13 +35,13 @@ wss.on('connection', function connection(ws, req) {
             messages_to_send.push(message);
         }
     });
-    ws.on('ping', function ping() {
-        console.log(new Date() + ' client ping: %s', ws['client_id']);
-        wsClient.ping();
+    ws.on('ping', function ping(message) {
+        console.log(new Date() + ' client ping: %s, %s', ws['client_id'], message);
+        wsClient.ping(message);
     });
-    ws.on('pong', function pong() {
-        console.log(new Date() + ' client pong: %s', ws['client_id']);
-        wsClient.pong();
+    ws.on('pong', function pong(message) {
+        console.log(new Date() + ' client pong: %s, %s', ws['client_id'], message);
+        wsClient.pong(message);
     });
     ws.on('close', function close() {
         console.log(new Date() + ' closed: %s', ws['client_id']);
@@ -60,7 +60,7 @@ wss.on('connection', function connection(ws, req) {
 wsClient.on('message', function incoming(data) {
     message_count++;
     wss.clients.forEach(function each(client) {
-        if (messages_to_receive.length < 2) {
+        if (messages_to_receive.length < 20) {
             messages_to_receive.push(data);
         }
         if (client.readyState === WebSocket.OPEN) {
@@ -97,18 +97,18 @@ setInterval(() => {
     });
 }, 60000);
 
-wsClient.on('ping', () => wss.clients.forEach(function each(client) {
-    console.log(new Date() + ' received server ping - proxying it %s', client['client_id']);
+wsClient.on('ping', (data) => wss.clients.forEach(function each(client) {
+    console.log(new Date() + ' received server ping - proxying to: %s, %s', client['client_id'], data);
     if (client.readyState === WebSocket.OPEN) {
-        client.ping();
+        client.ping(data);
     } else {
         console.log(new Date() + ' received server ping - client not open %s', client['client_id']);
     }
 }));
-wsClient.on('pong', () => wss.clients.forEach(function each(client) {
-    console.log(new Date() + ' received server pong - proxying it %s', client['client_id']);
+wsClient.on('pong', (data) => wss.clients.forEach(function each(client) {
+    console.log(new Date() + ' received server pong - proxying to: %s, %s', client['client_id'], data);
     if (client.readyState === WebSocket.OPEN) {
-        client.pong();
+        client.pong(data);
     } else {
         console.log(new Date() + ' received server pong - client not open %s', client['client_id']);
     }
