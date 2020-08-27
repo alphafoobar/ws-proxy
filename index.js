@@ -51,6 +51,13 @@ wss.on('connection', function connection(ws, req) {
 
     setTimeout(() => {
         if (ws.readyState === WebSocket.OPEN) {
+            console.log(new Date() + ' sending re-connect: %s', ws['client_id']);
+            ws.send('Please re-connect');
+        }
+    }, 12000);
+
+    setTimeout(() => {
+        if (ws.readyState === WebSocket.OPEN) {
             console.log(new Date() + ' closing client: %s', ws['client_id']);
             ws.close();
         }
